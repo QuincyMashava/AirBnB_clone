@@ -17,6 +17,8 @@ class HBNBCommand(cmd.Cmd):
     This class is the entry point to the command interpreter
     """
     prompt = "(hbnb)"
+    classes = {"BaseModel", "State", "City",
+               "Amenity", "Place", "Review", "User"}
 
     def do_EOF(self, line):
         """
@@ -59,6 +61,11 @@ class HBNBCommand(cmd.Cmd):
             instance.save()
             print(instance.id)
 
+    def parse(line):
+        """Helper method to parse user typed input"""
+        return tuple(line.split())
+
+
     def do_show(self, line):
         """
         Prints the string representation of an instance based on the class name and id
@@ -82,6 +89,27 @@ class HBNBCommand(cmd.Cmd):
                     storage.save()
         except IndexError:
             print("** instance id missing **")
+
+    def do_destroy(self, line):
+        """Destroy instance specified by user; Save changes to JSON file"""
+        if len(line) == 0:
+            print("** class name missing **")
+            return
+        args = parse(line)
+        if args[0] not in HBNBCommand.classes:
+            print("** class doesn't exist **")
+            return
+        try:
+            if args[1]:
+                name = "{}.{}".format(args[0], args[1])
+                if name not in storage.all().keys():
+                    print("** no instance found **")
+                else:
+                    del storage.all()[name]
+                    storage.save()
+        except IndexError:
+            print("** instance id missing **")
+            
 
     def do_all(self, line):
         """
@@ -183,15 +211,11 @@ class HBNBCommand(cmd.Cmd):
         except IndexError:
             print("*** Unknown syntax: {}".format(line))
 
-
-     
-
+            
 
 
 
-    def parse(line):
-        """Helper method to parse user typed input"""
-        return tuple(line.split())
+    
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
